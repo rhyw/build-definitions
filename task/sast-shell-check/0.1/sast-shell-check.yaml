@@ -36,10 +36,10 @@ spec:
         Whether to record the excluded findings (default to false).
         If `true`, the excluded findings will be stored in `excluded-findings.json`.
       default: "false"
-    - name: CSGREP_EVENT_FILTER
-      description: ShellCheck event filter for csgrep.
+    - name:IMP_FINDINGS_ONLY
       type: string
-      default: '\[SC(1020|1035|1054|1066|1068|1073|1080|1083|1099|1113|1115|1127|1128|1143|2043|2050|2055|2057|2066|2069|2071|2077|2078|2091|2092|2157|2171|2193|2194|2195|2215|2216|2218|2224|2225|2242|2256|2258|2261)\]$'
+      description: Whether to include important findings only
+      default: "true"
   steps:
     - name: sast-shell-check
       image: quay.io/redhat-appstudio/konflux-test:v1.4.7@sha256:cf6808a3bd605630a5d9f20595ff7c43f8645c00381219d32f5a11e88fe37072
@@ -53,8 +53,8 @@ spec:
           value: $(params.PROJECT_NVR)
         - name: RECORD_EXCLUDED
           value: $(params.RECORD_EXCLUDED)
-        - name: CSGREP_EVENT_FILTER
-          value: $(params.CSGREP_EVENT_FILTER)
+        - name: IMP_FINDINGS_ONLY
+          value: $(params.IMP_FINDINGS_ONLY)
       script: |
         #!/usr/bin/env bash
         set -x
@@ -121,7 +121,14 @@ spec:
             echo "KFP_GIT_URL is not set. Skipping false positive filtering."
         fi
 
-        csgrep --mode=json --event "$CSGREP_EVENT_FILTER" "$OUTPUT_FILE"
+        if [[ "$IMP_FINDINGS_ONLY" == "true" ]]; then
+            CSGREP_EVENT_FILTER='\[SC(1020|1035|1054|1066|1068|1073|1080|1083|1099|1113|1115|1127|1128|1143|2043|2050|\
+                                      2055|2057|2066|2069|2071|2077|2078|2091|2092|2157|2171|2193|2194|2195|2215|2216|\
+                                      2218|2224|2225|2242|2256|2258|2261)\]$'
+            csgrep --mode=json --event "$CSGREP_EVENT_FILTER" "$OUTPUT_FILE" > "$OUTPUT_FILE"
+        else
+            csgrep --mode=json "$OUTPUT_FILE" > "$OUTPUT_FILE"
+        fi
 
         echo "ShellCheck results have been saved to $OUTPUT_FILE"
 
