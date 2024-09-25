@@ -42,7 +42,7 @@ spec:
       default: '\[SC(1020|1035|1054|1066|1068|1073|1080|1083|1099|1113|1115|1127|1128|1143|2043|2050|2055|2057|2066|2069|2071|2077|2078|2091|2092|2157|2171|2193|2194|2195|2215|2216|2218|2224|2225|2242|2256|2258|2261)\]$'
   steps:
     - name: sast-shell-check
-      image: quay.io/redhat-appstudio/konflux-test:v1.4.5@sha256:801a105ba0f9c7f58f5ba5cde1a3b4404009fbebb1028779ca2c5de211e94940
+      image: quay.io/redhat-appstudio/konflux-test:v1.4.7@sha256:cf6808a3bd605630a5d9f20595ff7c43f8645c00381219d32f5a11e88fe37072
       # per https://kubernetes.io/docs/concepts/containers/images/#imagepullpolicy-defaulting
       # the cluster will set imagePullPolicy to IfNotPresent
       workingDir: $(workspaces.workspace.path)/hacbs/$(context.task.name)
@@ -59,9 +59,6 @@ spec:
         #!/usr/bin/env bash
         set -x
         . /utils.sh
-
-        # install dependencies
-        microdnf install -y csdiff
 
         # FIXME: once https://github.com/konflux-ci/konflux-test/pull/303 is available in latest image,
         # work around below is no longer needed
